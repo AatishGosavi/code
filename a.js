@@ -985,7 +985,7 @@ const MachinesPage = ({ machines, setMachines }) => {
 
 
 // --- NEW COMPONENT: Instrument Master Page ---
-// --- InstrumentsPage (Instrument Master) with 2-column form and field labels/tooltips ---
+// --- InstrumentsPage (Instrument Master) with 2-column add & edit forms, field labels/tooltips ---
 const InstrumentsPage = ({ instruments, setInstruments }) => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [instrumentToDeleteId, setInstrumentToDeleteId] = useState(null);
@@ -1102,11 +1102,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
           <form onSubmit={handleAddInstrument} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Row 1: Instrument Number & Name */}
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="instrumentNumber"
-                title="Unique number to identify the instrument"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="instrumentNumber" title="Unique number to identify the instrument">
                 Instrument Number
               </label>
               <input
@@ -1120,11 +1116,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
               />
             </div>
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="instrumentName"
-                title="Name of the instrument"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="instrumentName" title="Name of the instrument">
                 Instrument Name
               </label>
               <input
@@ -1139,11 +1131,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
             </div>
             {/* Row 2: Area & Status */}
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="area"
-                title="Physical area or department"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="area" title="Physical area or department">
                 Area
               </label>
               <input
@@ -1157,11 +1145,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
               />
             </div>
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="status"
-                title="Select instrument status"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="status" title="Select instrument status">
                 Status
               </label>
               <select
@@ -1177,11 +1161,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
             </div>
             {/* Row 3: Description & Frequency */}
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="description"
-                title="Short description or notes"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="description" title="Short description or notes">
                 Description
               </label>
               <textarea
@@ -1195,11 +1175,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
               />
             </div>
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="frequency"
-                title="Calibration frequency"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="frequency" title="Calibration frequency">
                 Frequency
               </label>
               <select
@@ -1216,11 +1192,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
             </div>
             {/* Row 4: Last Calibration & Next Due Date */}
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="lastCalibrationDone"
-                title="Date of last calibration performed"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="lastCalibrationDone" title="Date of last calibration performed">
                 Last Calibration Done
               </label>
               <input
@@ -1234,11 +1206,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
               />
             </div>
             <div>
-              <label
-                className="block text-gray-700 font-medium mb-1"
-                htmlFor="nextDueDate"
-                title="Next calibration due date (auto)"
-              >
+              <label className="block text-gray-700 font-medium mb-1" htmlFor="nextDueDate" title="Next calibration due date (auto)">
                 Next Due Date
               </label>
               <input
@@ -1325,42 +1293,56 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                 <X className="w-6 h-6 text-gray-500" />
               </button>
             </div>
-            <div className="space-y-4">
-              {/* All edit fields with labels and tooltips */}
-              <label className="block">
-                <span className="text-gray-700 font-medium">Instrument Number</span>
+            {/* 2-column grid form for editing */}
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Row 1: Instrument Number & Name */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-instrumentNumber" title="Unique number to identify the instrument">
+                  Instrument Number
+                </label>
                 <input
+                  id="edit-instrumentNumber"
                   type="text"
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.instrumentNumber}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, instrumentNumber: e.target.value })}
                   title="Unique number to identify the instrument"
                 />
-              </label>
-              <label className="block">
-                <span className="text-gray-700 font-medium">Instrument Name</span>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-instrumentName" title="Name of the instrument">
+                  Instrument Name
+                </label>
                 <input
+                  id="edit-instrumentName"
                   type="text"
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.instrumentName}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, instrumentName: e.target.value })}
                   title="Name of the instrument"
                 />
-              </label>
-              <label className="block">
-                <span className="text-gray-700 font-medium">Area</span>
+              </div>
+              {/* Row 2: Area & Status */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-area" title="Physical area or department">
+                  Area
+                </label>
                 <input
+                  id="edit-area"
                   type="text"
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.area}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, area: e.target.value })}
                   title="Physical area or department"
                 />
-              </label>
-              <label className="block">
-                <span className="text-gray-700 font-medium">Status</span>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-status" title="Select instrument status">
+                  Status
+                </label>
                 <select
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  id="edit-status"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.status}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, status: e.target.value })}
                   title="Select instrument status"
@@ -1368,22 +1350,28 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
-              </label>
-              <label className="block">
-                <span className="text-gray-700 font-medium">Description</span>
+              </div>
+              {/* Row 3: Description & Frequency */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-description" title="Short description or notes">
+                  Description
+                </label>
                 <textarea
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  id="edit-description"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.description}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, description: e.target.value })}
                   rows="2"
                   title="Short description or notes"
                 />
-              </label>
-              {/* Frequency Dropdown Edit */}
-              <label className="block">
-                <span className="text-gray-700 font-medium">Frequency</span>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-frequency" title="Calibration frequency">
+                  Frequency
+                </label>
                 <select
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  id="edit-frequency"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.frequency || 'Monthly'}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, frequency: e.target.value })}
                   title="Calibration frequency"
@@ -1392,37 +1380,46 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   <option value="Quarterly">Quarterly</option>
                   <option value="Yearly">Yearly</option>
                 </select>
-              </label>
-              {/* Last Calibration Done Edit */}
-              <label className="block">
-                <span className="text-gray-700 font-medium">Last Calibration Done</span>
+              </div>
+              {/* Row 4: Last Calibration & Next Due Date */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-lastCalibrationDone" title="Date of last calibration performed">
+                  Last Calibration Done
+                </label>
                 <input
+                  id="edit-lastCalibrationDone"
                   type="date"
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.lastCalibrationDone || ''}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, lastCalibrationDone: e.target.value })}
                   title="Date of last calibration performed"
                 />
-              </label>
-              {/* Next Due Date (grayed, auto-calculated, not editable) */}
-              <label className="block">
-                <span className="text-gray-700 font-medium">Next Due Date</span>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1" htmlFor="edit-nextDueDate" title="Next calibration due date (auto)">
+                  Next Due Date
+                </label>
                 <input
+                  id="edit-nextDueDate"
                   type="date"
-                  className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 text-gray-400 shadow-sm p-3 cursor-not-allowed"
+                  className="block w-full rounded-lg border-gray-300 bg-gray-100 text-gray-400 shadow-sm p-3 cursor-not-allowed"
                   value={editingInstrument.nextDueDate || calcNextDueDate(editingInstrument.lastCalibrationDone, editingInstrument.frequency) || ''}
                   disabled
                   title="Next calibration due date (auto-calculated)"
                 />
-              </label>
-              <button
-                onClick={handleUpdateInstrument}
-                className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
-              >
-                <Save className="w-5 h-5" />
-                <span>Save Changes</span>
-              </button>
-            </div>
+              </div>
+              {/* Submit button (full width) */}
+              <div className="md:col-span-2">
+                <button
+                  type="button"
+                  onClick={handleUpdateInstrument}
+                  className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <Save className="w-5 h-5" />
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </form>
           </div>
           <MessageBox
             isOpen={isMessageBoxOpen}
