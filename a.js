@@ -985,7 +985,7 @@ const MachinesPage = ({ machines, setMachines }) => {
 
 
 // --- NEW COMPONENT: Instrument Master Page ---
-// --- InstrumentsPage (Instrument Master) with instrumentNumber field ---
+// --- InstrumentsPage (Instrument Master) with Frequency and Next Due Date auto-calc ---
 const InstrumentsPage = ({ instruments, setInstruments }) => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [instrumentToDeleteId, setInstrumentToDeleteId] = useState(null);
@@ -999,7 +999,24 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
   const [status, setStatus] = useState('Active');
   const [description, setDescription] = useState('');
   const [lastCalibrationDone, setLastCalibrationDone] = useState('');
+  const [frequency, setFrequency] = useState('Monthly'); // NEW FIELD
+  const [nextDueDate, setNextDueDate] = useState('');    // NEW FIELD
   const [isFormExpanded, setIsFormExpanded] = useState(false);
+
+  // --- Helper function to calculate Next Due Date ---
+  function calcNextDueDate(lastDate, freq) {
+    if (!lastDate || !freq) return '';
+    const date = new Date(lastDate);
+    if (freq === 'Monthly') date.setMonth(date.getMonth() + 1);
+    if (freq === 'Quarterly') date.setMonth(date.getMonth() + 3);
+    if (freq === 'Yearly') date.setFullYear(date.getFullYear() + 1);
+    return date.toISOString().slice(0, 10);
+  }
+
+  // --- Auto-calculate next due date when lastCalibrationDone or frequency changes (add mode) ---
+  useEffect(() => {
+    setNextDueDate(calcNextDueDate(lastCalibrationDone, frequency));
+  }, [lastCalibrationDone, frequency]);
 
   const handleAddInstrument = (e) => {
     e.preventDefault();
@@ -1016,6 +1033,8 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
       status,
       description,
       lastCalibrationDone,
+      frequency,          // <--- NEW FIELD
+      nextDueDate,        // <--- NEW FIELD
     };
     setInstruments([...instruments, newInstrument]);
     setInstrumentNumber('');
@@ -1024,8 +1043,21 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
     setDescription('');
     setStatus('Active');
     setLastCalibrationDone('');
+    setFrequency('Monthly');
+    setNextDueDate('');
     setIsFormExpanded(false);
   };
+
+  // --- Auto-calc for edit modal ---
+  useEffect(() => {
+    if (isEditModalOpen && editingInstrument) {
+      setEditingInstrument((prev) => ({
+        ...prev,
+        nextDueDate: calcNextDueDate(prev.lastCalibrationDone, prev.frequency)
+      }));
+    }
+    // eslint-disable-next-line
+  }, [isEditModalOpen, editingInstrument?.lastCalibrationDone, editingInstrument?.frequency]);
 
   const handleUpdateInstrument = () => {
     if (!editingInstrument.instrumentNumber || !editingInstrument.instrumentName || !editingInstrument.area) {
@@ -1106,12 +1138,31 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
               onChange={(e) => setDescription(e.target.value)}
               rows="2"
             />
+            {/* Frequency Dropdown */}
+            <select
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
+            >
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+            {/* Last Calibration Done */}
             <input
               type="date"
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
               placeholder="Last Calibration Done"
               value={lastCalibrationDone}
               onChange={(e) => setLastCalibrationDone(e.target.value)}
+            />
+            {/* Next Due Date (grayed, auto-calculated) */}
+            <input
+              type="date"
+              className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 text-gray-400 shadow-sm p-3 cursor-not-allowed"
+              placeholder="Next Due Date"
+              value={nextDueDate}
+              disabled
             />
             <button
               type="submit"
@@ -1135,9 +1186,9 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   <div className="text-sm text-gray-500">Area: {instrument.area}</div>
                   <div className="text-sm text-gray-500">Status: <span className={`font-medium ${instrument.status === 'Active' ? 'text-green-600' : 'text-red-600'}`}>{instrument.status}</span></div>
                   {instrument.description && <div className="text-sm text-gray-500">{instrument.description}</div>}
-                  {instrument.lastCalibrationDone && (
-                    <div className="text-sm text-gray-500">Last Calibration Done: {instrument.lastCalibrationDone}</div>
-                  )}
+                  <div className="text-sm text-gray-500">Frequency: {instrument.frequency || '-'}</div>
+                  <div className="text-sm text-gray-500">Last Calibration Done: {instrument.lastCalibrationDone || '-'}</div>
+                  <div className="text-sm text-gray-500">Next Due Date: {instrument.nextDueDate || calcNextDueDate(instrument.lastCalibrationDone, instrument.frequency) || '-'}</div>
                 </div>
                 <div className="flex space-x-2">
                   <button
@@ -1173,7 +1224,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
         title="Error"
         message={messageBoxMessage}
       />
-      {isEditModalOpen && (
+      {isEditModalOpen && editingInstrument && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
             <div className="flex justify-between items-center border-b pb-4 mb-4">
@@ -1230,6 +1281,20 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   rows="2"
                 />
               </label>
+              {/* Frequency Dropdown Edit */}
+              <label className="block">
+                <span className="text-gray-700 font-medium">Frequency</span>
+                <select
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  value={editingInstrument.frequency || 'Monthly'}
+                  onChange={(e) => setEditingInstrument({ ...editingInstrument, frequency: e.target.value })}
+                >
+                  <option value="Monthly">Monthly</option>
+                  <option value="Quarterly">Quarterly</option>
+                  <option value="Yearly">Yearly</option>
+                </select>
+              </label>
+              {/* Last Calibration Done Edit */}
               <label className="block">
                 <span className="text-gray-700 font-medium">Last Calibration Done</span>
                 <input
@@ -1237,6 +1302,16 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.lastCalibrationDone || ''}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, lastCalibrationDone: e.target.value })}
+                />
+              </label>
+              {/* Next Due Date (grayed, auto-calculated, not editable) */}
+              <label className="block">
+                <span className="text-gray-700 font-medium">Next Due Date</span>
+                <input
+                  type="date"
+                  className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 text-gray-400 shadow-sm p-3 cursor-not-allowed"
+                  value={editingInstrument.nextDueDate || calcNextDueDate(editingInstrument.lastCalibrationDone, editingInstrument.frequency) || ''}
+                  disabled
                 />
               </label>
               <button
@@ -1259,290 +1334,6 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
     </div>
   );
 };
-
-// Component for the anonymous breakdown ticket form
-const BreakdownTicketFormAnonymous = ({ onAddTicket, machines, onGoBack }) => {
-  // State for form inputs
-  const [shift, setShift] = useState('First');
-  const [downtimeFrom, setDowntimeFrom] = useState('');
-  const [downtimeTo, setDowntimeTo] = useState(''); // State for downtime to
-  const [totalDowntime, setTotalDowntime] = useState('0 hours 0 minutes');
-  const [typeOfWork, setTypeOfWork] = useState('Breakdown');
-  const [machineId, setMachineId] = useState('');
-  const [location, setLocation] = useState('');
-  const [problemObserved, setProblemObserved] = useState('');
-  const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
-  const [messageBoxMessage, setMessageBoxMessage] = useState('');
-
-  // Get a list of unique locations
-  const uniqueLocations = Array.from(new Set(machines.map(m => m.area)));
-
-  // Filter machines based on selected location
-  const filteredMachines = machines.filter(m => m.area === location);
-
-  // Set the current date and time on initial load
-  useEffect(() => {
-    const now = new Date();
-    const formattedDateTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    setDowntimeFrom(formattedDateTime);
-    // Note: downtimeTo is intentionally left blank for anonymous users
-  }, []);
-
-  // Calculate downtime whenever "from" or "to" fields change
-  useEffect(() => {
-    if (downtimeFrom && downtimeTo) {
-      const from = new Date(downtimeFrom);
-      const to = new Date(downtimeTo);
-      const diffInMs = to.getTime() - from.getTime();
-
-      if (diffInMs < 0) {
-        setTotalDowntime('Invalid time');
-        return;
-      }
-
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-      const hours = Math.floor(diffInMinutes / 60);
-      const minutes = diffInMinutes % 60;
-      setTotalDowntime(`${hours} hours ${minutes} minutes`);
-    } else {
-      setTotalDowntime('0 hours 0 minutes');
-    }
-  }, [downtimeFrom, downtimeTo]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // Basic form validation for anonymous users
-    if (!shift || !downtimeFrom || !machineId || !problemObserved) {
-      setMessageBoxMessage('Please fill out all required fields.');
-      setIsMessageBoxOpen(true);
-      return;
-    }
-
-    // Create new ticket object
-    const newTicket = {
-      id: generateId(),
-      type: typeOfWork,
-      title: `${typeOfWork}: ${machines.find(m => m.id === machineId)?.machineName}`,
-      dateOfWork: new Date().toISOString(),
-      shift,
-      downtimeFrom,
-      downtimeTo: '', // Set downtimeTo to an empty string for anonymous submissions
-      totalDowntime: '0 hours 0 minutes', // Set total downtime to 0
-      machineId,
-      location,
-      problemObserved,
-      status: 'Open',
-      materialRequired: '',
-      attendedBy: 'Anonymous',
-      correctiveAction: '',
-      materialReplaced: '',
-      remark: '',
-    };
-
-    onAddTicket(newTicket);
-    setShift('First');
-    setDowntimeFrom('');
-    setDowntimeTo('');
-    setTypeOfWork('Breakdown');
-    setMachineId('');
-    setLocation('');
-    setProblemObserved('');
-
-    setMessageBoxMessage('Ticket submitted successfully! You will be redirected to the main page.');
-    setIsMessageBoxOpen(true);
-
-    setTimeout(() => {
-        onGoBack();
-    }, 2000);
-  };
-
-  const today = new Date().toISOString().slice(0, 10);
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-4xl">
-        <div className="flex justify-between items-center border-b pb-4 mb-6">
-          <h2 className="text-3xl font-bold text-gray-800">Report a Breakdown</h2>
-          <button
-            onClick={onGoBack}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors flex items-center space-x-1"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            <span>Back</span>
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-gray-700">Work Details</h3>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Date of Work</span>
-              <input
-                type="date"
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value={today}
-                disabled
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Shift</span>
-              <select
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                value={shift}
-                onChange={(e) => setShift(e.target.value)}
-              >
-                <option>First</option>
-                <option>Second</option>
-                <option>Night</option>
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Downtime From</span>
-              <input
-                type="datetime-local"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                value={downtimeFrom}
-                onChange={(e) => setDowntimeFrom(e.target.value)}
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Downtime To</span>
-              <input
-                type="datetime-local"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                value={downtimeTo}
-                onChange={(e) => setDowntimeTo(e.target.value)}
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Total Downtime</span>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value={totalDowntime}
-                disabled
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Material Required</span>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value="N/A"
-                disabled
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Attended By</span>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value="Anonymous"
-                disabled
-              />
-            </label>
-          </div>
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-gray-700">Problem Details</h3>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Type of Work</span>
-              <select
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                value={typeOfWork}
-                onChange={(e) => setTypeOfWork(e.target.value)}
-              >
-                <option>Breakdown</option>
-                <option>Other Work</option>
-              </select>
-            </label>
-             <label className="block">
-              <span className="text-gray-700 font-medium">Location</span>
-              <select
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                value={location}
-                onChange={(e) => {
-                  setLocation(e.target.value);
-                  setMachineId(''); // Reset machineId when location changes
-                }}
-              >
-                <option value="">Select a Location</option>
-                {uniqueLocations.map(area => (
-                  <option key={area} value={area}>{area}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Machine Name</span>
-              <select
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                value={machineId}
-                onChange={(e) => setMachineId(e.target.value)}
-                disabled={!location}
-              >
-                <option value="">Select a Machine</option>
-                {filteredMachines.map(m => (
-                  <option key={m.id} value={m.id}>{m.machineName}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Problem Observed</span>
-              <textarea
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                value={problemObserved}
-                onChange={(e) => setProblemObserved(e.target.value)}
-                rows="4"
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Corrective Action</span>
-              <textarea
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value="N/A"
-                disabled
-                rows="2"
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Material Replaced</span>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value="N/A"
-                disabled
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Remark</span>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value="N/A"
-                disabled
-              />
-            </label>
-          </div>
-          <div className="md:col-span-2">
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
-            >
-              <Save className="w-5 h-5" />
-              <span>Submit Breakdown Ticket</span>
-            </button>
-          </div>
-        </form>
-      </div>
-      <MessageBox
-        isOpen={isMessageBoxOpen}
-        onClose={() => setIsMessageBoxOpen(false)}
-        title="Form Submission"
-        message={messageBoxMessage}
-      />
-    </div>
-  );
-};
-
 
 // NEW Component for logged-in users to close a breakdown ticket
 const BreakdownTicketFormLoggedIn = ({ ticket, machines, currentUser, onSave, onGoBack }) => {
