@@ -985,7 +985,7 @@ const MachinesPage = ({ machines, setMachines }) => {
 
 
 // --- NEW COMPONENT: Instrument Master Page ---
-// --- InstrumentsPage (Instrument Master) with Frequency and Next Due Date auto-calc ---
+// --- InstrumentsPage (Instrument Master) with 2-column form and field labels/tooltips ---
 const InstrumentsPage = ({ instruments, setInstruments }) => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [instrumentToDeleteId, setInstrumentToDeleteId] = useState(null);
@@ -999,11 +999,10 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
   const [status, setStatus] = useState('Active');
   const [description, setDescription] = useState('');
   const [lastCalibrationDone, setLastCalibrationDone] = useState('');
-  const [frequency, setFrequency] = useState('Monthly'); // NEW FIELD
-  const [nextDueDate, setNextDueDate] = useState('');    // NEW FIELD
+  const [frequency, setFrequency] = useState('Monthly');
+  const [nextDueDate, setNextDueDate] = useState('');
   const [isFormExpanded, setIsFormExpanded] = useState(false);
 
-  // --- Helper function to calculate Next Due Date ---
   function calcNextDueDate(lastDate, freq) {
     if (!lastDate || !freq) return '';
     const date = new Date(lastDate);
@@ -1013,7 +1012,6 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
     return date.toISOString().slice(0, 10);
   }
 
-  // --- Auto-calculate next due date when lastCalibrationDone or frequency changes (add mode) ---
   useEffect(() => {
     setNextDueDate(calcNextDueDate(lastCalibrationDone, frequency));
   }, [lastCalibrationDone, frequency]);
@@ -1033,8 +1031,8 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
       status,
       description,
       lastCalibrationDone,
-      frequency,          // <--- NEW FIELD
-      nextDueDate,        // <--- NEW FIELD
+      frequency,
+      nextDueDate,
     };
     setInstruments([...instruments, newInstrument]);
     setInstrumentNumber('');
@@ -1048,7 +1046,6 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
     setIsFormExpanded(false);
   };
 
-  // --- Auto-calc for edit modal ---
   useEffect(() => {
     if (isEditModalOpen && editingInstrument) {
       setEditingInstrument((prev) => ({
@@ -1096,80 +1093,173 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
           <button
             onClick={() => setIsFormExpanded(!isFormExpanded)}
             className="p-2 text-blue-500 hover:bg-blue-100 rounded-full transition-colors"
+            aria-label={isFormExpanded ? "Collapse form" : "Expand form"}
           >
             {isFormExpanded ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
           </button>
         </div>
         {isFormExpanded && (
-          <form onSubmit={handleAddInstrument} className="space-y-4">
-            <input
-              type="text"
-              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              placeholder="Instrument Number"
-              value={instrumentNumber}
-              onChange={(e) => setInstrumentNumber(e.target.value)}
-            />
-            <input
-              type="text"
-              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              placeholder="Instrument Name"
-              value={instrumentName}
-              onChange={(e) => setInstrumentName(e.target.value)}
-            />
-            <input
-              type="text"
-              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              placeholder="Area"
-              value={area}
-              onChange={(e) => setArea(e.target.value)}
-            />
-            <select
-              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-            <textarea
-              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              placeholder="Description (Optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows="2"
-            />
-            {/* Frequency Dropdown */}
-            <select
-              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-            >
-              <option value="Monthly">Monthly</option>
-              <option value="Quarterly">Quarterly</option>
-              <option value="Yearly">Yearly</option>
-            </select>
-            {/* Last Calibration Done */}
-            <input
-              type="date"
-              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              placeholder="Last Calibration Done"
-              value={lastCalibrationDone}
-              onChange={(e) => setLastCalibrationDone(e.target.value)}
-            />
-            {/* Next Due Date (grayed, auto-calculated) */}
-            <input
-              type="date"
-              className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 text-gray-400 shadow-sm p-3 cursor-not-allowed"
-              placeholder="Next Due Date"
-              value={nextDueDate}
-              disabled
-            />
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
-            >
-              Add Instrument
-            </button>
+          <form onSubmit={handleAddInstrument} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Row 1: Instrument Number & Name */}
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="instrumentNumber"
+                title="Unique number to identify the instrument"
+              >
+                Instrument Number
+              </label>
+              <input
+                id="instrumentNumber"
+                type="text"
+                className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                placeholder="e.g. I-101"
+                value={instrumentNumber}
+                onChange={(e) => setInstrumentNumber(e.target.value)}
+                title="Unique number to identify the instrument"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="instrumentName"
+                title="Name of the instrument"
+              >
+                Instrument Name
+              </label>
+              <input
+                id="instrumentName"
+                type="text"
+                className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                placeholder="e.g. Pressure Gauge"
+                value={instrumentName}
+                onChange={(e) => setInstrumentName(e.target.value)}
+                title="Name of the instrument"
+              />
+            </div>
+            {/* Row 2: Area & Status */}
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="area"
+                title="Physical area or department"
+              >
+                Area
+              </label>
+              <input
+                id="area"
+                type="text"
+                className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                placeholder="e.g. Assembly Floor"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                title="Physical area or department"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="status"
+                title="Select instrument status"
+              >
+                Status
+              </label>
+              <select
+                id="status"
+                className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                title="Select instrument status"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            {/* Row 3: Description & Frequency */}
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="description"
+                title="Short description or notes"
+              >
+                Description
+              </label>
+              <textarea
+                id="description"
+                className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                placeholder="Description (Optional)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows="2"
+                title="Short description or notes"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="frequency"
+                title="Calibration frequency"
+              >
+                Frequency
+              </label>
+              <select
+                id="frequency"
+                className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                title="Calibration frequency"
+              >
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
+            </div>
+            {/* Row 4: Last Calibration & Next Due Date */}
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="lastCalibrationDone"
+                title="Date of last calibration performed"
+              >
+                Last Calibration Done
+              </label>
+              <input
+                id="lastCalibrationDone"
+                type="date"
+                className="block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                placeholder="Last Calibration Done"
+                value={lastCalibrationDone}
+                onChange={(e) => setLastCalibrationDone(e.target.value)}
+                title="Date of last calibration performed"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-gray-700 font-medium mb-1"
+                htmlFor="nextDueDate"
+                title="Next calibration due date (auto)"
+              >
+                Next Due Date
+              </label>
+              <input
+                id="nextDueDate"
+                type="date"
+                className="block w-full rounded-lg border-gray-300 bg-gray-100 text-gray-400 shadow-sm p-3 cursor-not-allowed"
+                placeholder="Next Due Date"
+                value={nextDueDate}
+                disabled
+                title="Next calibration due date (auto-calculated)"
+              />
+            </div>
+            {/* Submit Button, full width */}
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
+              >
+                Add Instrument
+              </button>
+            </div>
           </form>
         )}
       </div>
@@ -1194,12 +1284,14 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   <button
                     onClick={() => openEditModal(instrument)}
                     className="p-2 text-blue-500 hover:bg-blue-100 rounded-full transition-colors"
+                    title="Edit Instrument"
                   >
                     <Edit className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => openDeleteModal(instrument.id)}
                     className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-colors"
+                    title="Delete Instrument"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -1234,6 +1326,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
               </button>
             </div>
             <div className="space-y-4">
+              {/* All edit fields with labels and tooltips */}
               <label className="block">
                 <span className="text-gray-700 font-medium">Instrument Number</span>
                 <input
@@ -1241,6 +1334,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.instrumentNumber}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, instrumentNumber: e.target.value })}
+                  title="Unique number to identify the instrument"
                 />
               </label>
               <label className="block">
@@ -1250,6 +1344,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.instrumentName}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, instrumentName: e.target.value })}
+                  title="Name of the instrument"
                 />
               </label>
               <label className="block">
@@ -1259,6 +1354,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.area}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, area: e.target.value })}
+                  title="Physical area or department"
                 />
               </label>
               <label className="block">
@@ -1267,6 +1363,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.status}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, status: e.target.value })}
+                  title="Select instrument status"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -1279,6 +1376,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   value={editingInstrument.description}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, description: e.target.value })}
                   rows="2"
+                  title="Short description or notes"
                 />
               </label>
               {/* Frequency Dropdown Edit */}
@@ -1288,6 +1386,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.frequency || 'Monthly'}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, frequency: e.target.value })}
+                  title="Calibration frequency"
                 >
                   <option value="Monthly">Monthly</option>
                   <option value="Quarterly">Quarterly</option>
@@ -1302,6 +1401,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                   value={editingInstrument.lastCalibrationDone || ''}
                   onChange={(e) => setEditingInstrument({ ...editingInstrument, lastCalibrationDone: e.target.value })}
+                  title="Date of last calibration performed"
                 />
               </label>
               {/* Next Due Date (grayed, auto-calculated, not editable) */}
@@ -1312,6 +1412,7 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 text-gray-400 shadow-sm p-3 cursor-not-allowed"
                   value={editingInstrument.nextDueDate || calcNextDueDate(editingInstrument.lastCalibrationDone, editingInstrument.frequency) || ''}
                   disabled
+                  title="Next calibration due date (auto-calculated)"
                 />
               </label>
               <button
