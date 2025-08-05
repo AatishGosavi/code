@@ -253,16 +253,26 @@ const PMScheduleModal = ({ isOpen, onClose, onSavePmTickets, machines }) => {
     }
   }, [isOpen]);
 
-  const handleSelectMachines = (e) => {
-    const options = e.target.options;
-    const selected = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value);
+  // Find your existing handleSelectMachines function and replace it ENTIRELY with this:
+const handleSelectMachines = (e) => { // <-- START REPLACE HERE
+  const options = e.target.options;
+  const selected = [];
+  let allSelected = false;
+  for (let i = 0; i < options.length; i++) {
+    if (options[i].selected) {
+      if (options[i].value === "ALL") {
+        allSelected = true;
+        break;
       }
+      selected.push(options[i].value);
     }
+  }
+  if (allSelected) {
+    setSelectedMachines(filteredMachines.map(m => m.id));
+  } else {
     setSelectedMachines(selected);
-  };
+  }
+}; // <-- END REPLACE HERE
 
   const handleSave = () => {
     if (!selectedLocation || selectedMachines.length === 0 || !startDate || !endDate) {
@@ -322,19 +332,20 @@ const PMScheduleModal = ({ isOpen, onClose, onSavePmTickets, machines }) => {
           {selectedLocation && (
             <div className="block">
               <span className="text-gray-700 font-medium">Select Machines (Ctrl + Click to select multiple)</span>
-              <select
-                multiple
-                size="6"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 max-h-40 overflow-y-auto"
-                value={selectedMachines}
-                onChange={handleSelectMachines}
-              >
-                {filteredMachines.map(machine => (
-                  <option key={machine.id} value={machine.id}>
-                    {machine.machineName} ({machine.assetNumber})
-                  </option>
-                ))}
-              </select>
+             <select // <-- START REPLACE HERE
+  multiple
+  size="6"
+  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 max-h-40 overflow-y-auto"
+  value={selectedMachines}
+  onChange={handleSelectMachines}
+>
+  <option value="ALL">Select All</option>
+  {filteredMachines.map(machine => (
+    <option key={machine.id} value={machine.id}>
+      {machine.machineName} ({machine.assetNumber})
+    </option>
+  ))}
+</select> 
             </div>
           )}
 
