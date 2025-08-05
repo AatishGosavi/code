@@ -1960,6 +1960,7 @@ const [instruments, setInstruments] = useState([
   { id: 'i2', instrumentNumber: 'I-102', instrumentName: 'Temperature Sensor', area: 'Packing Section', status: 'Active', description: 'Monitors temperature', lastCalibrationDone: '' },
 ]);
   const [isPmModalOpen, setIsPmModalOpen] = useState(false);
+  const [isCalibrationModalOpen, setIsCalibrationModalOpen] = useState(false); // [Schedule Calibration Button] ADD THIS LINE
   const [isDaySummaryModal, setIsDaySummaryModal] = useState(false);
   const [selectedDateTickets, setSelectedDateTickets] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -2057,25 +2058,53 @@ const [instruments, setInstruments] = useState([
 
     switch (currentPage) {
       case 'calendar':
-        return (
-          <>
-            <CalendarComponent
-              pmTickets={pmTickets}
-              currentMonth={currentDate.getMonth()}
-              currentYear={currentDate.getFullYear()}
-              onPrev={handlePrevMonth}
-              onNext={handleNextMonth}
-              onDayClick={handleDayClick}
-            />
-            <button
-              onClick={() => setIsPmModalOpen(true)}
-              className="mt-8 bg-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center space-x-2"
-            >
-              <Calendar className="w-5 h-5" />
-              <span>Schedule PM</span>
-            </button>
-          </>
-        );
+  return (
+    <>
+      <CalendarComponent
+        pmTickets={pmTickets}
+        currentMonth={currentDate.getMonth()}
+        currentYear={currentDate.getFullYear()}
+        onPrev={handlePrevMonth}
+        onNext={handleNextMonth}
+        onDayClick={handleDayClick}
+      />
+      <div className="flex flex-row">
+        <button
+          onClick={() => setIsPmModalOpen(true)}
+          className="mt-8 bg-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center space-x-2"
+        >
+          <Calendar className="w-5 h-5" />
+          <span>Schedule PM</span>
+        </button>
+        {/* [Schedule Calibration Button] BEGIN */}
+        <button
+          onClick={() => setIsCalibrationModalOpen(true)}
+          className="mt-8 ml-4 bg-green-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-green-600 transition-all duration-200 flex items-center space-x-2"
+        >
+          <Calendar className="w-5 h-5" />
+          <span>Schedule Calibration</span>
+        </button>
+        {/* [Schedule Calibration Button] END */}
+      </div>
+    </>
+  );
+
+// 3. Add this (or similar) where you render modals, near your PMScheduleModal
+
+{isCalibrationModalOpen && (
+  // [Schedule Calibration Modal Placeholder]
+  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
+      <h3 className="text-2xl font-bold mb-4">Schedule Calibration (Coming Soon)</h3>
+      <button
+        onClick={() => setIsCalibrationModalOpen(false)}
+        className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
       case 'pms':
         return <PmsPage pmTickets={pmTickets} />;
       case 'tickets':
