@@ -399,6 +399,184 @@ const handleSelectMachines = (e) => { // <-- START REPLACE HERE
   );
 };
 
+// Modal for scheduling calibration events
+const CalibrationScheduleModal = ({
+  isOpen,
+  onClose,
+  onSaveCalibrationTickets,
+  instruments
+}) => {
+  const [selectedArea, setSelectedArea] = useState('');
+  const [selectedInstruments, setSelectedInstruments] = useState([]);
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
+  const [frequency, setFrequency] = useState('Monthly');
+  const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
+  const [messageBoxMessage, setMessageBoxMessage] = useState('');
+
+  // Get unique areas from the instrument master
+  const uniqueAreas = Array.from(new Set(instruments.map(i => i.area)));
+  // Filter instruments based on selected area
+  const filteredInstruments = instruments.filter(i => i.area === selectedArea);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedArea('');
+      setSelectedInstruments([]);
+      setStartDate(new Date().toISOString().slice(0, 10));
+      setEndDate(new Date().toISOString().slice(0, 10));
+      setFrequency('Monthly');
+    }
+  }, [isOpen]);
+
+  const handleSelectInstruments = (e) => {
+    const options = e.target.options;
+    const selected = [];
+    let allSelected = false;
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) {
+        if (options[i].value === "ALL") {
+          allSelected = true;
+          break;
+        }
+        selected.push(options[i].value);
+      }
+    }
+    if (allSelected) {
+      setSelectedInstruments(filteredInstruments.map(i => i.id));
+    } else {
+      setSelectedInstruments(selected);
+    }
+  };
+
+  const handleSave = () => {
+    if (!selectedArea || selectedInstruments.length === 0 || !startDate || !endDate) {
+      setMessageBoxMessage('Please select an area, at least one instrument, a start date, and an end date.');
+      setIsMessageBoxOpen(true);
+      return;
+    }
+
+    const newCalibrationTickets = [];
+    selectedInstruments.forEach(instrumentId => {
+      const instrument = instruments.find(i => i.id === instrumentId);
+      newCalibrationTickets.push({
+        id: generateId(),
+        title: `Calibration: ${instrument.instrumentNumber} - ${instrument.instrumentName}`,
+        scheduledDate: new Date(startDate).toISOString(),
+        status: 'Open',
+        instrumentId: instrument.id,
+        instrumentNumber: instrument.instrumentNumber,
+        instrumentName: instrument.instrumentName,
+        area: instrument.area,
+        frequency: frequency,
+        type: "Calibration"
+      });
+    });
+
+    onSaveCalibrationTickets(newCalibrationTickets);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="flex justify-between items-center border-b pb-4 mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">Schedule Calibration</h3>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition-colors">
+            <X className="w-6 h-6 text-gray-500" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <label className="block">
+            <span className="text-gray-700 font-medium">Area</span>
+            <select
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+              value={selectedArea}
+              onChange={e => {
+                setSelectedArea(e.target.value);
+                setSelectedInstruments([]);
+              }}
+            >
+              <option value="">Select Area</option>
+              {uniqueAreas.map(area => (
+                <option key={area} value={area}>{area}</option>
+              ))}
+            </select>
+          </label>
+
+          {selectedArea && (
+            <div className="block">
+              <span className="text-gray-700 font-medium">Select Instruments (Ctrl + Click to select multiple)</span>
+              <select
+                multiple
+                size="6"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 max-h-40 overflow-y-auto"
+                value={selectedInstruments}
+                onChange={handleSelectInstruments}
+              >
+                <option value="ALL">Select All</option>
+                {filteredInstruments.map(inst => (
+                  <option key={inst.id} value={inst.id}>
+                    {inst.instrumentNumber} : {inst.instrumentName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <label className="block">
+            <span className="text-gray-700 font-medium">Start Date</span>
+            <input
+              type="date"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+            />
+          </label>
+          <label className="block">
+            <span className="text-gray-700 font-medium">End Date</span>
+            <input
+              type="date"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+            />
+          </label>
+          <label className="block">
+            <span className="text-gray-700 font-medium">Frequency</span>
+            <select
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+              value={frequency}
+              onChange={e => setFrequency(e.target.value)}
+            >
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+          </label>
+          <button
+            onClick={handleSave}
+            className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-green-600 transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Save Calibration Schedule</span>
+          </button>
+        </div>
+      </div>
+      <MessageBox
+        isOpen={isMessageBoxOpen}
+        onClose={() => setIsMessageBoxOpen(false)}
+        title="Error"
+        message={messageBoxMessage}
+      />
+    </div>,
+    document.body
+  );
+};
+
+
 // Placeholder component for the PM Schedules page
 const PmsPage = ({ pmTickets }) => {
   const getStatusColor = (status) => {
@@ -1861,6 +2039,10 @@ const [instruments, setInstruments] = useState([
 ]);
   const [isPmModalOpen, setIsPmModalOpen] = useState(false);
   const [isCalibrationModalOpen, setIsCalibrationModalOpen] = useState(false); // [Schedule Calibration Button] ADD THIS LINE
+  // Handler for saving calibration tickets
+const handleSaveCalibrationTickets = (newCalibrationTickets) => {
+  setTickets(prev => [...prev, ...newCalibrationTickets]);
+};
   const [isDaySummaryModal, setIsDaySummaryModal] = useState(false);
   const [selectedDateTickets, setSelectedDateTickets] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -2116,6 +2298,13 @@ const [instruments, setInstruments] = useState([
             selectedDate={selectedDate}
             ticketsForDate={selectedDateTickets}
           />
+              {/* Add the next line here ↓↓↓ */}
+    <CalibrationScheduleModal
+      isOpen={isCalibrationModalOpen}
+      onClose={() => setIsCalibrationModalOpen(false)}
+      onSaveCalibrationTickets={handleSaveCalibrationTickets}
+      instruments={instruments}
+    />
         </>
       )}
     </div>
