@@ -974,6 +974,7 @@ const MachinesPage = ({ machines, setMachines }) => {
 
 
 // --- NEW COMPONENT: Instrument Master Page ---
+// --- InstrumentsPage (Instrument Master) with instrumentNumber field ---
 const InstrumentsPage = ({ instruments, setInstruments }) => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [instrumentToDeleteId, setInstrumentToDeleteId] = useState(null);
@@ -981,39 +982,42 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
   const [messageBoxMessage, setMessageBoxMessage] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingInstrument, setEditingInstrument] = useState(null);
-  const [assetNumber, setAssetNumber] = useState('');
+  const [instrumentNumber, setInstrumentNumber] = useState('');
   const [instrumentName, setInstrumentName] = useState('');
   const [area, setArea] = useState('');
   const [status, setStatus] = useState('Active');
   const [description, setDescription] = useState('');
+  const [lastCalibrationDone, setLastCalibrationDone] = useState('');
   const [isFormExpanded, setIsFormExpanded] = useState(false);
 
   const handleAddInstrument = (e) => {
     e.preventDefault();
-    if (!assetNumber || !instrumentName || !area) {
+    if (!instrumentNumber || !instrumentName || !area) {
       setMessageBoxMessage('All fields are required to add a new instrument.');
       setIsMessageBoxOpen(true);
       return;
     }
     const newInstrument = {
       id: generateId(),
-      assetNumber,
+      instrumentNumber,
       instrumentName,
       area,
       status,
       description,
+      lastCalibrationDone,
     };
     setInstruments([...instruments, newInstrument]);
-    setAssetNumber('');
+    setInstrumentNumber('');
     setInstrumentName('');
     setArea('');
     setDescription('');
     setStatus('Active');
+    setLastCalibrationDone('');
     setIsFormExpanded(false);
   };
 
   const handleUpdateInstrument = () => {
-    if (!editingInstrument.assetNumber || !editingInstrument.instrumentName || !editingInstrument.area) {
+    if (!editingInstrument.instrumentNumber || !editingInstrument.instrumentName || !editingInstrument.area) {
       setMessageBoxMessage('All fields are required to update an instrument.');
       setIsMessageBoxOpen(true);
       return;
@@ -1058,9 +1062,9 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
             <input
               type="text"
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-              placeholder="Asset Number"
-              value={assetNumber}
-              onChange={(e) => setAssetNumber(e.target.value)}
+              placeholder="Instrument Number"
+              value={instrumentNumber}
+              onChange={(e) => setInstrumentNumber(e.target.value)}
             />
             <input
               type="text"
@@ -1091,6 +1095,13 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
               onChange={(e) => setDescription(e.target.value)}
               rows="2"
             />
+            <input
+              type="date"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+              placeholder="Last Calibration Done"
+              value={lastCalibrationDone}
+              onChange={(e) => setLastCalibrationDone(e.target.value)}
+            />
             <button
               type="submit"
               className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
@@ -1109,10 +1120,13 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
             instruments.map(instrument => (
               <li key={instrument.id} className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-lg font-semibold text-gray-900">{instrument.assetNumber} - {instrument.instrumentName}</div>
+                  <div className="text-lg font-semibold text-gray-900">{instrument.instrumentNumber} - {instrument.instrumentName}</div>
                   <div className="text-sm text-gray-500">Area: {instrument.area}</div>
                   <div className="text-sm text-gray-500">Status: <span className={`font-medium ${instrument.status === 'Active' ? 'text-green-600' : 'text-red-600'}`}>{instrument.status}</span></div>
                   {instrument.description && <div className="text-sm text-gray-500">{instrument.description}</div>}
+                  {instrument.lastCalibrationDone && (
+                    <div className="text-sm text-gray-500">Last Calibration Done: {instrument.lastCalibrationDone}</div>
+                  )}
                 </div>
                 <div className="flex space-x-2">
                   <button
@@ -1159,12 +1173,12 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
             </div>
             <div className="space-y-4">
               <label className="block">
-                <span className="text-gray-700 font-medium">Asset Number</span>
+                <span className="text-gray-700 font-medium">Instrument Number</span>
                 <input
                   type="text"
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
-                  value={editingInstrument.assetNumber}
-                  onChange={(e) => setEditingInstrument({ ...editingInstrument, assetNumber: e.target.value })}
+                  value={editingInstrument.instrumentNumber}
+                  onChange={(e) => setEditingInstrument({ ...editingInstrument, instrumentNumber: e.target.value })}
                 />
               </label>
               <label className="block">
@@ -1205,6 +1219,15 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
                   rows="2"
                 />
               </label>
+              <label className="block">
+                <span className="text-gray-700 font-medium">Last Calibration Done</span>
+                <input
+                  type="date"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                  value={editingInstrument.lastCalibrationDone || ''}
+                  onChange={(e) => setEditingInstrument({ ...editingInstrument, lastCalibrationDone: e.target.value })}
+                />
+              </label>
               <button
                 onClick={handleUpdateInstrument}
                 className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
@@ -1225,7 +1248,6 @@ const InstrumentsPage = ({ instruments, setInstruments }) => {
     </div>
   );
 };
-
 
 // Component for the anonymous breakdown ticket form
 const BreakdownTicketFormAnonymous = ({ onAddTicket, machines, onGoBack }) => {
@@ -1932,11 +1954,11 @@ export default function App() {
     { id: 'm3', assetNumber: 'M-003', machineName: 'Conveyor Belt', area: 'Packing Section', status: 'Active', description: 'Conveyor belt for packaging' },
     { id: 'm4', assetNumber: 'M-004', machineName: 'Mixing Tank', area: 'Assembly Floor', status: 'Active', description: 'Large mixing tank' },
   ]);
-  // --- NEW STATE FOR INSTRUMENTS ---
-  const [instruments, setInstruments] = useState([
-    { id: 'i1', assetNumber: 'I-101', instrumentName: 'Pressure Gauge', area: 'Assembly Floor', status: 'Active', description: 'Measures pressure in tank' },
-    { id: 'i2', assetNumber: 'I-102', instrumentName: 'Temperature Sensor', area: 'Packing Section', status: 'Active', description: 'Monitors temperature' },
-  ]);
+  // --- INSTRUMENTS STATE --- (UPDATED)
+const [instruments, setInstruments] = useState([
+  { id: 'i1', instrumentNumber: 'I-101', instrumentName: 'Pressure Gauge', area: 'Assembly Floor', status: 'Active', description: 'Measures pressure in tank', lastCalibrationDone: '' },
+  { id: 'i2', instrumentNumber: 'I-102', instrumentName: 'Temperature Sensor', area: 'Packing Section', status: 'Active', description: 'Monitors temperature', lastCalibrationDone: '' },
+]);
   const [isPmModalOpen, setIsPmModalOpen] = useState(false);
   const [isDaySummaryModal, setIsDaySummaryModal] = useState(false);
   const [selectedDateTickets, setSelectedDateTickets] = useState([]);
