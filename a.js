@@ -1860,7 +1860,7 @@ const BreakdownTicketFormLoggedIn = ({ ticket, machines, currentUser, onSave, on
 
 
 // Component for the new Tickets page with tabs
-const TicketsPage = ({ tickets, pmTickets, onClosePmTicket, onEditBreakdownTicket }) => {
+const TicketsPage = ({ tickets, pmTickets, calibrationTickets, onClosePmTicket, onEditBreakdownTicket }) => {
   const [activeTab, setActiveTab] = useState('breakdown');
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
@@ -1904,71 +1904,119 @@ const TicketsPage = ({ tickets, pmTickets, onClosePmTicket, onEditBreakdownTicke
           <Ticket className="w-5 h-5" />
           <span>Maintenance Tickets</span>
         </button>
+          <button
+  onClick={() => setActiveTab('calibration')}
+  className={`p-4 font-semibold text-lg transition-colors duration-200 flex items-center space-x-2 ${
+    activeTab === 'calibration'
+      ? 'text-blue-500 border-b-4 border-blue-500'
+      : 'text-gray-500 hover:text-gray-700'
+  }`}
+>
+  Calibration Tickets
+</button>
+
       </div>
-
       {/* Content based on active tab */}
-      {activeTab === 'breakdown' && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-gray-700">Open Breakdown Tickets</h3>
-          {tickets.length > 0 ? (
-            tickets.map(ticket => (
-              <li key={ticket.id} className="list-none p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
-                  <div className="text-sm text-gray-500">Assigned to: {ticket.attendedBy}</div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${getStatusColor(ticket.status)}`}>
-                    {ticket.status}
-                  </div>
-                  {/* The new "Close" button for breakdown tickets */}
-                  {ticket.status === 'Open' && (
-                    <button
-                      onClick={() => onEditBreakdownTicket(ticket)}
-                      className="p-2 text-green-500 hover:bg-green-100 rounded-full transition-colors"
-                    >
-                      <CheckSquare className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 italic">No breakdown tickets found.</p>
-          )}
-        </div>
-      )}
+{activeTab === 'breakdown' && (
+  <div className="space-y-4">
+    <h3 className="text-xl font-semibold text-gray-700">Open Breakdown Tickets</h3>
+    {tickets.length > 0 ? (
+      tickets.map(ticket => (
+<li
+  key={ticket.id}
+  className="list-none p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-200"
+  onClick={() => console.log('Clicked ticket:', ticket)}
+>
 
-      {activeTab === 'maintenance' && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-gray-700">Open Maintenance Tickets</h3>
-          {pmTickets.filter(t => t.status === 'Open').length > 0 ? (
-            pmTickets.filter(t => t.status === 'Open').map(ticket => (
-              <li key={ticket.id} className="list-none p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
-                  <div className="text-sm text-gray-500">Scheduled for: {new Date(ticket.scheduledDate).toLocaleDateString()}</div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${getStatusColor(ticket.status)}`}>
-                    {ticket.status}
-                  </div>
-                  {ticket.status === 'Open' && (
-                    <button
-                      onClick={() => handleCloseTicket(ticket.id, ticket.frequency, ticket.assetId)}
-                      className="p-2 text-green-500 hover:bg-green-100 rounded-full transition-colors"
-                    >
-                      <CheckSquare className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 italic">No open maintenance tickets found.</p>
-          )}
-        </div>
-      )}
+          <div>
+            <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
+            <div className="text-sm text-gray-500">Assigned to: {ticket.attendedBy}</div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${getStatusColor(ticket.status)}`}>
+              {ticket.status}
+            </div>
+            {/* The new "Close" button for breakdown tickets */}
+            {ticket.status === 'Open' && (
+              <button
+                onClick={() => onEditBreakdownTicket(ticket)}
+                className="p-2 text-green-500 hover:bg-green-100 rounded-full transition-colors"
+              >
+                <CheckSquare className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </li>
+      ))
+    ) : (
+      <p className="text-center text-gray-500 italic">No breakdown tickets found.</p>
+    )}
+  </div>
+)}
+
+{activeTab === 'maintenance' && (
+  <div className="space-y-4">
+    <h3 className="text-xl font-semibold text-gray-700">Open Maintenance Tickets</h3>
+    {pmTickets.filter(t => t.status === 'Open').length > 0 ? (
+      pmTickets.filter(t => t.status === 'Open').map(ticket => (
+        <li key={ticket.id} className="list-none p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
+          <div>
+            <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
+            <div className="text-sm text-gray-500">Scheduled for: {new Date(ticket.scheduledDate).toLocaleDateString()}</div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${getStatusColor(ticket.status)}`}>
+              {ticket.status}
+            </div>
+            {ticket.status === 'Open' && (
+              <button
+                onClick={() => handleCloseTicket(ticket.id, ticket.frequency, ticket.assetId)}
+                className="p-2 text-green-500 hover:bg-green-100 rounded-full transition-colors"
+              >
+                <CheckSquare className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </li>
+      ))
+    ) : (
+      <p className="text-center text-gray-500 italic">No open maintenance tickets found.</p>
+    )}
+  </div>
+)}
+
+{activeTab === 'calibration' && (
+  <div className="space-y-4">
+    <h3 className="text-xl font-semibold text-gray-700">Open Calibration Tickets</h3>
+    {calibrationTickets.filter(t => t.status === 'Open').length > 0 ? (
+      calibrationTickets
+        .filter(t => t.status === 'Open')
+        .map(ticket => (
+          <li key={ticket.id} className="list-none p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
+            <div>
+              <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
+              <div className="text-sm text-gray-500">
+                Scheduled for: {new Date(ticket.scheduledDate).toLocaleDateString()}
+              </div>
+              <div className="text-sm text-gray-500">
+                Instrument: {ticket.instrumentNumber} - {ticket.instrumentName}
+              </div>
+              <div className="text-sm text-gray-500">Area: {ticket.area}</div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${getStatusColor(ticket.status)}`}>
+                {ticket.status}
+              </div>
+            </div>
+          </li>
+        ))
+    ) : (
+      <p className="text-center text-gray-500 italic">No open calibration tickets found.</p>
+    )}
+  </div>
+)}
+
+      
 
       {/* Notification Toast */}
       {showNotification && createPortal(
@@ -1999,6 +2047,7 @@ export default function App() {
   const [currentUserRole, setCurrentUserRole] = useState(null); // New state for user role
   const [currentPage, setCurrentPage] = useState('tickets');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [calibrationTickets, setCalibrationTickets] = useState([]);
   const [tickets, setTickets] = useState([
     {
       id: generateId(),
@@ -2040,9 +2089,11 @@ const [instruments, setInstruments] = useState([
   const [isPmModalOpen, setIsPmModalOpen] = useState(false);
   const [isCalibrationModalOpen, setIsCalibrationModalOpen] = useState(false); // [Schedule Calibration Button] ADD THIS LINE
   // Handler for saving calibration tickets
+
 const handleSaveCalibrationTickets = (newCalibrationTickets) => {
-  setTickets(prev => [...prev, ...newCalibrationTickets]);
+  setCalibrationTickets(prev => [...prev, ...newCalibrationTickets]);
 };
+
   const [isDaySummaryModal, setIsDaySummaryModal] = useState(false);
   const [selectedDateTickets, setSelectedDateTickets] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -2190,7 +2241,13 @@ const handleSaveCalibrationTickets = (newCalibrationTickets) => {
       case 'pms':
         return <PmsPage pmTickets={pmTickets} />;
       case 'tickets':
-        return <TicketsPage tickets={tickets} pmTickets={pmTickets} onClosePmTicket={handleClosePmTicket} onEditBreakdownTicket={handleEditBreakdownTicket} />;
+        return <TicketsPage
+        tickets={tickets}
+        pmTickets={pmTickets}
+        calibrationTickets={calibrationTickets}
+        onClosePmTicket={handleClosePmTicket}
+        onEditBreakdownTicket={handleEditBreakdownTicket}
+      />;
       case 'machines':
         return <MachinesPage machines={machines} setMachines={setMachines} />;
       case 'instruments':
