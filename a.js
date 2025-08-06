@@ -2130,6 +2130,11 @@ const handleSaveCalibrationTickets = (newCalibrationTickets) => {
 
   const handleClosePmTicket = (ticketId, frequency, assetId) => {
     const closedDate = new Date();
+    const ticket = pmTickets.find(t => t.id === ticketId);
+  if (new Date(ticket.scheduledDate) > closedDate) {
+    alert("You cannot close a PM ticket scheduled for a future date.");
+    return;
+  }
 
     setPmTickets(prevTickets =>
       prevTickets.map(ticket =>
@@ -2178,7 +2183,14 @@ const handleSaveCalibrationTickets = (newCalibrationTickets) => {
   };
 const handleCloseCalibrationTicket = (ticketId, frequency, instrumentId, instrumentName) => {
   const closedDate = new Date();
+  
+const ticket = calibrationTickets.find(t => t.id === ticketId);
+if (new Date(ticket.scheduledDate) > closedDate) {
+  alert("You cannot close a calibration ticket scheduled for a future date.");
+  return;
+}
 
+  
   setCalibrationTickets(prevTickets =>
     prevTickets.map(ticket =>
       ticket.id === ticketId
