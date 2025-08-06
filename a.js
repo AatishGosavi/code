@@ -2133,13 +2133,8 @@ const handleSaveCalibrationTickets = (newCalibrationTickets) => {
     const ticket = pmTickets.find(t => t.id === ticketId);
     
   if (new Date(ticket.scheduledDate) > closedDate) {
-    setNotificationMessage("You cannot close a PM ticket scheduled for a future date.");
-    setShowNotification(true);
-    setTimeout(() => {
-      setShowNotification(false);
-      setNotificationMessage('');
-    }, 3000);
-    return; 
+    alert("You cannot close a PM ticket scheduled for a future date.");
+    return;
   }
 
 
