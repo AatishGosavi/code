@@ -1860,7 +1860,7 @@ const BreakdownTicketFormLoggedIn = ({ ticket, machines, currentUser, onSave, on
 
 
 // Component for the new Tickets page with tabs
-const TicketsPage = ({ tickets, pmTickets, calibrationTickets, onClosePmTicket, onEditBreakdownTicket }) => {
+const TicketsPage = ({ tickets, pmTickets, calibrationTickets, onClosePmTicket,onCloseCalibrationTicket, onEditBreakdownTicket }) => {
   const [activeTab, setActiveTab] = useState('breakdown');
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
@@ -2004,10 +2004,21 @@ const TicketsPage = ({ tickets, pmTickets, calibrationTickets, onClosePmTicket, 
               <div className="text-sm text-gray-500">Area: {ticket.area}</div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${getStatusColor(ticket.status)}`}>
-                {ticket.status}
-              </div>
-            </div>
+            <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${getStatusColor(ticket.status)}`}>
+            {ticket.status}
+           </div>
+  {ticket.status === 'Open' && (
+    <button
+      onClick={() =>
+        onCloseCalibrationTicket(ticket.id, ticket.frequency, ticket.instrumentNumber, ticket.instrumentName)
+      }
+      className="p-2 text-green-500 hover:bg-green-100 rounded-full transition-colors"
+    >
+      <CheckSquare className="w-5 h-5" />
+    </button>
+  )}
+</div>
+
           </li>
         ))
     ) : (
@@ -2165,7 +2176,41 @@ const handleSaveCalibrationTickets = (newCalibrationTickets) => {
     setEditingTicket(null);
     setCurrentPage('tickets');
   };
+const handleCloseCalibrationTicket = (ticketId, frequency, instrumentId, instrumentName) => {
+  const closedDate = new Date();
 
+  setCalibrationTickets(prevTickets =>
+    prevTickets.map(ticket =>
+      ticket.id === ticketId
+        ? { ...ticket, status: 'Closed', closedDate: closedDate.toISOString() }
+        : ticket
+    )
+  );
+
+  const nextScheduledDate = new Date(closedDate);
+  if (frequency === 'Monthly') nextScheduledDate.setMonth(closedDate.getMonth() + 1);
+  else if (frequency === 'Quarterly') nextScheduledDate.setMonth(closedDate.getMonth() + 3);
+  else if (frequency === 'Yearly') nextScheduledDate.setFullYear(closedDate.getFullYear() + 1);
+
+  const newTicket = {
+    id: generateId(),
+    title: `Calibration: ${instrumentId} - ${instrumentName}`,
+    scheduledDate: nextScheduledDate.toISOString(),
+    status: 'Open',
+    instrumentId,
+    instrumentNumber: instrumentId,
+    instrumentName,
+    area: '', // Optional: fill if available
+    frequency,
+    type: 'Calibration',
+  };
+
+  setCalibrationTickets(prev => [...prev, newTicket]);
+};
+
+
+
+          
   const handleLogin = (username, role) => {
       setIsLoggedIn(true);
       setCurrentUser(username);
@@ -2246,6 +2291,7 @@ const handleSaveCalibrationTickets = (newCalibrationTickets) => {
         pmTickets={pmTickets}
         calibrationTickets={calibrationTickets}
         onClosePmTicket={handleClosePmTicket}
+        onCloseCalibrationTicket={handleCloseCalibrationTicket}
         onEditBreakdownTicket={handleEditBreakdownTicket}
       />;
       case 'machines':
