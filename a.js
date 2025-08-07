@@ -1884,6 +1884,17 @@ const TicketsPage = ({ tickets, pmTickets, calibrationTickets, onClosePmTicket,o
     }, 3000); // Hide the notification after 3 seconds
   };
 
+const handleCloseCalibration = (ticketId, frequency, instrumentId, instrumentName) => {
+  onCloseCalibrationTicket(ticketId, frequency, instrumentId, instrumentName);
+  setNotificationMessage(`Calibration ticket for ${instrumentId} closed! A new one has been scheduled.`);
+  setShowNotification(true);
+  setTimeout(() => {
+    setShowNotification(false);
+    setNotificationMessage('');
+  }, 3000);
+};
+
+
   return (
     <div className="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto w-full">
       <h2 className="text-3xl font-bold text-gray-800 mb-6">Tickets</h2>
@@ -2010,7 +2021,7 @@ const TicketsPage = ({ tickets, pmTickets, calibrationTickets, onClosePmTicket,o
   {ticket.status === 'Open' && (
     <button
       onClick={() =>
-        onCloseCalibrationTicket(ticket.id, ticket.frequency, ticket.instrumentNumber, ticket.instrumentName)
+        handleCloseCalibration(ticket.id, ticket.frequency, ticket.instrumentNumber, ticket.instrumentName)
       }
       className="p-2 text-green-500 hover:bg-green-100 rounded-full transition-colors"
     >
@@ -2415,7 +2426,7 @@ if (new Date(ticket.scheduledDate) > closedDate) {
             selectedDate={selectedDate}
             ticketsForDate={selectedDateTickets}
           />
-              {/* Add the next line here ↓↓↓ */}
+              {/* Add the next line here ??? */}
     <CalibrationScheduleModal
       isOpen={isCalibrationModalOpen}
       onClose={() => setIsCalibrationModalOpen(false)}
