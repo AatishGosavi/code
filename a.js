@@ -607,9 +607,28 @@ if (activeTab === 'pm') {
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto w-full">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Ticket History</h2>     
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">Ticket History</h2>  
+            <div className="mb-4">
+  <label className="mr-2 font-medium text-gray-700">Filter by Status:</label>
+  <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="px-3 py-2 border rounded-md"
+  >
+    <option value="All">All</option>
+    <option value="Open">Open</option>
+    <option value="Closed">Closed</option>
+    <option value="In Progress">In Progress</option>
+  </select>
+</div> 
+
+
+
+
+
       <div className="mb-6">
       <div className="flex space-x-4 border-b pb-2">
+        
     
     <button
           onClick={() => setActiveTab('breakdown')}
@@ -638,19 +657,7 @@ if (activeTab === 'pm') {
     
      </div>
     </div>
-<div className="mb-4">
-  <label className="mr-2 font-medium text-gray-700">Filter by Status:</label>
-  <select
-    value={statusFilter}
-    onChange={(e) => setStatusFilter(e.target.value)}
-    className="px-3 py-2 border rounded-md"
-  >
-    <option value="All">All</option>
-    <option value="Open">Open</option>
-    <option value="Closed">Closed</option>
-    <option value="In Progress">In Progress</option>
-  </select>
-</div>
+
 
       {/* Summary section */}
       <div className="flex justify-around text-center border-b pb-4 mb-6">
