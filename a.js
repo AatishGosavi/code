@@ -2675,7 +2675,7 @@ if (currentPage === 'anonymous-form') {
               className={`p-3 rounded-full transition-all duration-200 flex items-center space-x-2 font-medium ${currentPage === 'pms' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
             >
               <List className="w-5 h-5" />
-              <span>PM Schedules</span>
+              <span>Ticket History</span>
             </button>
             <button
               onClick={() => setCurrentPage('machines')}
