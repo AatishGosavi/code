@@ -1878,6 +1878,16 @@ const BreakdownTicketFormAnonymous = ({ machines, onCreateTicket, onGoBack }) =>
       setLocation('');
     }
   }, [machineId, machines]);
+
+  
+useEffect(() => {
+  const now = new Date();
+  const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16); // Format: 'YYYY-MM-DDTHH:mm'
+  setDowntimeFrom(localISOTime);
+}, []);
+
   // Calculate downtime whenever "from" or "to" fields change
   useEffect(() => {
     if (downtimeFrom && downtimeTo) {
@@ -1903,7 +1913,7 @@ const BreakdownTicketFormAnonymous = ({ machines, onCreateTicket, onGoBack }) =>
     e.preventDefault();
 
     // Basic form validation for anonymous users
-    if (!shift || !downtimeFrom || !downtimeTo || !machineId || !problemObserved) {
+    if (!shift || !downtimeFrom ||  !machineId || !problemObserved) {
       setMessageBoxMessage('Please fill out all required fields.');
       setIsMessageBoxOpen(true);
       return;
@@ -1915,7 +1925,7 @@ const BreakdownTicketFormAnonymous = ({ machines, onCreateTicket, onGoBack }) =>
       title: `${typeOfWork}: ${machines.find(m => m.id === machineId)?.machineName}`,
       dateOfWork: new Date().toISOString(),
       shift,
-      downtimeFrom,
+      downtimeFrom:new Date().toISOString().slice(0, 16),
       downtimeTo,
       totalDowntime,
       machineId,
