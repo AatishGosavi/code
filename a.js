@@ -606,11 +606,35 @@ if (activeTab === 'pm') {
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto w-full">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">Ticket History</h2>     
       <div className="mb-6">
       <div className="flex space-x-4 border-b pb-2">
-    <button onClick={() => setActiveTab('breakdown')} className={`px-4 py-2 font-semibold ${activeTab === 'breakdown' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}>Breakdown Ticket History</button>
-    <button onClick={() => setActiveTab('pm')} className={`px-4 py-2 font-semibold ${activeTab === 'pm' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}>PM Ticket History</button>
-    <button onClick={() => setActiveTab('calibration')} className={`px-4 py-2 font-semibold ${activeTab === 'calibration' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}>Calibration Ticket History</button>
+    
+    <button
+          onClick={() => setActiveTab('breakdown')}
+          className={`p-4 font-semibold text-lg transition-colors duration-200 flex items-center space-x-2 ${activeTab === 'breakdown' ? 'text-blue-500 border-b-4 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          <Wrench className="w-5 h-5" />
+          <span>Breakdown </span>
+        </button>
+        <button
+          onClick={() => setActiveTab('maintenance')}
+          className={`p-4 font-semibold text-lg transition-colors duration-200 flex items-center space-x-2 ${activeTab === 'maintenance' ? 'text-blue-500 border-b-4 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          <Ticket className="w-5 h-5" />
+          <span>Preventive Maintenance </span>
+        </button>
+    <button
+  onClick={() => setActiveTab('calibration')}
+  className={`p-4 font-semibold text-lg transition-colors duration-200 flex items-center space-x-2 ${
+    activeTab === 'calibration'
+      ? 'text-blue-500 border-b-4 border-blue-500'
+      : 'text-gray-500 hover:text-gray-700'
+  }`}
+>
+  Calibration
+</button>
+    
      </div>
     </div>
 
@@ -2239,14 +2263,14 @@ const handleCloseCalibration = (ticketId, frequency, instrumentId, instrumentNam
           className={`p-4 font-semibold text-lg transition-colors duration-200 flex items-center space-x-2 ${activeTab === 'breakdown' ? 'text-blue-500 border-b-4 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
         >
           <Wrench className="w-5 h-5" />
-          <span>Breakdown Tickets</span>
+          <span>Breakdown </span>
         </button>
         <button
           onClick={() => setActiveTab('maintenance')}
           className={`p-4 font-semibold text-lg transition-colors duration-200 flex items-center space-x-2 ${activeTab === 'maintenance' ? 'text-blue-500 border-b-4 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
         >
           <Ticket className="w-5 h-5" />
-          <span>Maintenance Tickets</span>
+          <span>Preventive Maintenance </span>
         </button>
           <button
   onClick={() => setActiveTab('calibration')}
@@ -2256,7 +2280,7 @@ const handleCloseCalibration = (ticketId, frequency, instrumentId, instrumentNam
       : 'text-gray-500 hover:text-gray-700'
   }`}
 >
-  Calibration Tickets
+  Calibration
 </button>
 
       </div>
