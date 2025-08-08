@@ -1869,16 +1869,12 @@ const BreakdownTicketFormAnonymous = ({ machines, onCreateTicket, onGoBack }) =>
   const [problemObserved, setProblemObserved] = useState('');
   const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
   const [messageBoxMessage, setMessageBoxMessage] = useState('');
-  // Update location when machine selection changes
-  useEffect(() => {
-    const selectedMachine = machines.find(m => m.id === machineId);
-    if (selectedMachine) {
-      setLocation(selectedMachine.area);
-    } else {
-      setLocation('');
-    }
-  }, [machineId, machines]);
+  // Get a list of unique locations
+  const uniqueLocations = Array.from(new Set(machines.map(m => m.area)));
 
+  // Filter machines based on selected location
+  const filteredMachines = machines.filter(m => m.area === location);
+ 
   
 useEffect(() => {
   const now = new Date();
@@ -2055,27 +2051,35 @@ const today = new Date().toISOString().slice(0, 10);
                 <option>Other Work</option>
               </select>
             </label>
+             <label className="block">
+              <span className="text-gray-700 font-medium">Location</span>
+              <select
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  setMachineId(''); // Reset machineId when location changes
+                }}
+              >
+                <option value="">Select a Location</option>
+                {uniqueLocations.map(area => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+            </label>
             <label className="block">
               <span className="text-gray-700 font-medium">Machine Name</span>
               <select
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
                 value={machineId}
                 onChange={(e) => setMachineId(e.target.value)}
+                disabled={!location}
               >
                 <option value="">Select a Machine</option>
-                {machines.map(m => (
+                {filteredMachines.map(m => (
                   <option key={m.id} value={m.id}>{m.machineName}</option>
                 ))}
               </select>
-            </label>
-            <label className="block">
-              <span className="text-gray-700 font-medium">Location</span>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
-                value={location}
-                disabled
-              />
             </label>
             <label className="block">
               <span className="text-gray-700 font-medium">Problem Observed</span>
