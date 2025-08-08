@@ -580,6 +580,7 @@ const CalibrationScheduleModal = ({
 // Placeholder component for the PM Schedules page
   const PmsPage = ({ pmTickets, tickets, calibrationTickets })  => {
     const [activeTab, setActiveTab] = useState('pm');
+    const [statusFilter, setStatusFilter] = useState('All');
     const getStatusColor = (status) => {
     switch (status) {
       case 'Open': return 'bg-red-500';
@@ -637,6 +638,19 @@ if (activeTab === 'pm') {
     
      </div>
     </div>
+<div className="mb-4">
+  <label className="mr-2 font-medium text-gray-700">Filter by Status:</label>
+  <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="px-3 py-2 border rounded-md"
+  >
+    <option value="All">All</option>
+    <option value="Open">Open</option>
+    <option value="Closed">Closed</option>
+    <option value="In Progress">In Progress</option>
+  </select>
+</div>
 
       {/* Summary section */}
       <div className="flex justify-around text-center border-b pb-4 mb-6">
@@ -655,7 +669,8 @@ if (activeTab === 'pm') {
        <ul className="space-y-4">
 
         {pmTickets.length > 0 ? (
-          pmTickets.map(ticket => (
+          pmTickets.filter(t => statusFilter === 'All' || t.status === statusFilter)
+          .map(ticket => (
               <li key={ticket.id} className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
                 <div>
                   <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
@@ -681,7 +696,9 @@ if (activeTab === 'pm') {
 )}
    {activeTab === 'breakdown' && (
   <ul className="space-y-4">
-    {tickets.filter(t => t.type === 'Breakdown').map(ticket => (
+    {tickets
+  .filter(t => t.type === 'Breakdown' && (statusFilter === 'All' || t.status === statusFilter))
+  .map(ticket => (
       <li key={ticket.id} className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
         <div>
           <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
@@ -694,7 +711,8 @@ if (activeTab === 'pm') {
 )}
 {activeTab === 'calibration' && (
   <ul className="space-y-4">
-    {calibrationTickets.map(ticket => (
+    {calibrationTickets.filter(t => statusFilter === 'All' || t.status === statusFilter)
+    .map(ticket => (
       <li key={ticket.id} className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
         <div>
           <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
