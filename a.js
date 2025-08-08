@@ -578,8 +578,9 @@ const CalibrationScheduleModal = ({
 
 
 // Placeholder component for the PM Schedules page
-const PmsPage = ({ pmTickets }) => {
-  const getStatusColor = (status) => {
+  const PmsPage = ({ pmTickets, tickets, calibrationTickets })  => {
+    const [activeTab, setActiveTab] = useState('pm');
+    const getStatusColor = (status) => {
     switch (status) {
       case 'Open': return 'bg-red-500';
       case 'Closed': return 'bg-green-500';
@@ -587,12 +588,31 @@ const PmsPage = ({ pmTickets }) => {
     }
   };
 
-  const completedTickets = pmTickets.filter(t => t.status === 'Closed');
-  const pendingTickets = pmTickets.filter(t => t.status === 'Open');
+  
+let completedTickets = [];
+let pendingTickets = [];
+
+if (activeTab === 'pm') {
+  completedTickets = pmTickets.filter(t => t.status === 'Closed');
+  pendingTickets = pmTickets.filter(t => t.status === 'Open');
+} else if (activeTab === 'breakdown') {
+  completedTickets = tickets.filter(t => t.type === 'Breakdown' && t.status === 'Closed');
+  pendingTickets = tickets.filter(t => t.type === 'Breakdown' && t.status === 'Open');
+} else if (activeTab === 'calibration') {
+  completedTickets = calibrationTickets.filter(t => t.status === 'Closed');
+  pendingTickets = calibrationTickets.filter(t => t.status === 'Open');
+}
+
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto w-full">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">PM Ticket History</h2>
+      <div className="mb-6">
+      <div className="flex space-x-4 border-b pb-2">
+    <button onClick={() => setActiveTab('breakdown')} className={`px-4 py-2 font-semibold ${activeTab === 'breakdown' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}>Breakdown Ticket History</button>
+    <button onClick={() => setActiveTab('pm')} className={`px-4 py-2 font-semibold ${activeTab === 'pm' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}>PM Ticket History</button>
+    <button onClick={() => setActiveTab('calibration')} className={`px-4 py-2 font-semibold ${activeTab === 'calibration' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}>Calibration Ticket History</button>
+     </div>
+    </div>
 
       {/* Summary section */}
       <div className="flex justify-around text-center border-b pb-4 mb-6">
@@ -607,7 +627,9 @@ const PmsPage = ({ pmTickets }) => {
       </div>
 
       {/* Ticket List */}
-      <ul className="space-y-4">
+      {activeTab === 'pm' && (
+       <ul className="space-y-4">
+
         {pmTickets.length > 0 ? (
           pmTickets.map(ticket => (
               <li key={ticket.id} className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
@@ -631,6 +653,36 @@ const PmsPage = ({ pmTickets }) => {
           <p className="text-center text-gray-500 italic">No PM tickets found.</p>
         )}
       </ul>
+      
+)}
+   {activeTab === 'breakdown' && (
+  <ul className="space-y-4">
+    {tickets.filter(t => t.type === 'Breakdown').map(ticket => (
+      <li key={ticket.id} className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+          <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
+          <div className="text-sm text-gray-500">Scheduled for: {new Date(ticket.dateOfWork).toLocaleDateString()}</div>
+        </div>
+        <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${ticket.status === 'Closed' ? 'bg-green-500' : 'bg-red-500'}`}>{ticket.status}</div>
+      </li>
+    ))}
+  </ul>
+)}
+{activeTab === 'calibration' && (
+  <ul className="space-y-4">
+    {calibrationTickets.map(ticket => (
+      <li key={ticket.id} className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between">
+        <div>
+          <div className="text-lg font-semibold text-gray-900">{ticket.title}</div>
+          <div className="text-sm text-gray-500">Scheduled for: {new Date(ticket.scheduledDate).toLocaleDateString()}</div>
+        </div>
+        <div className={`px-3 py-1 rounded-full text-white font-bold text-sm ${ticket.status === 'Closed' ? 'bg-green-500' : 'bg-red-500'}`}>{ticket.status}</div>
+      </li>
+    ))}
+  </ul>
+)}
+
+
     </div>
   );
 };
@@ -2607,7 +2659,7 @@ if (new Date(ticket.scheduledDate) > closedDate) {
   </div>
 )}
       case 'pms':
-        return <PmsPage pmTickets={pmTickets} />;
+        return <PmsPage pmTickets={pmTickets} tickets={tickets} calibrationTickets={calibrationTickets} />;
       case 'tickets':
         return <TicketsPage
         tickets={tickets}
