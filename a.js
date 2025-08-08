@@ -2212,8 +2212,18 @@ const handleCloseCalibration = (ticketId, frequency, instrumentId, instrumentNam
 {activeTab === 'breakdown' && (
   <div className="space-y-4">
     <h3 className="text-xl font-semibold text-gray-700">Open Breakdown Tickets</h3>
-    {tickets.length > 0 ? (
-      tickets.map(ticket => (
+    
+{tickets.filter(ticket => 
+  ticket.type === 'Breakdown' && 
+  (ticket.status === 'Open' || ticket.status === 'In Progress')
+).length > 0 ? (
+  tickets
+    .filter(ticket => 
+      ticket.type === 'Breakdown' && 
+      (ticket.status === 'Open' || ticket.status === 'In Progress')
+    )
+    .map(ticket => (
+
 <li
   key={ticket.id}
   className="list-none p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-200"
@@ -2371,8 +2381,7 @@ export default function App() {
       materialReplaced: '',
       remark: ''
     },
-    { id: generateId(), title: 'HVAC System Maintenance', type: 'Other Work', status: 'In Progress', attendedBy: 'Jane Smith' },
-    { id: generateId(), title: 'Lighting in Warehouse B', type: 'Breakdown', status: 'Open', attendedBy: 'John Doe' },
+    
   ]);
   const [pmTickets, setPmTickets] = useState([]);
   const [users, setUsers] = useState([
