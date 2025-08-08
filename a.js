@@ -1857,6 +1857,273 @@ const BreakdownTicketFormLoggedIn = ({ ticket, machines, currentUser, onSave, on
     </div>
   );
 };
+const BreakdownTicketFormAnonymous = ({ machines, onCreateTicket, onGoBack }) => {
+  // State for form inputs
+  const [shift, setShift] = useState('First');
+  const [downtimeFrom, setDowntimeFrom] = useState('');
+  const [downtimeTo, setDowntimeTo] = useState('');
+  const [totalDowntime, setTotalDowntime] = useState('0 hours 0 minutes');
+  const [typeOfWork, setTypeOfWork] = useState('Breakdown');
+  const [machineId, setMachineId] = useState('');
+  const [location, setLocation] = useState('');
+  const [problemObserved, setProblemObserved] = useState('');
+  const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
+  const [messageBoxMessage, setMessageBoxMessage] = useState('');
+  // Update location when machine selection changes
+  useEffect(() => {
+    const selectedMachine = machines.find(m => m.id === machineId);
+    if (selectedMachine) {
+      setLocation(selectedMachine.area);
+    } else {
+      setLocation('');
+    }
+  }, [machineId, machines]);
+  // Calculate downtime whenever "from" or "to" fields change
+  useEffect(() => {
+    if (downtimeFrom && downtimeTo) {
+      const from = new Date(downtimeFrom);
+      const to = new Date(downtimeTo);
+      const diffInMs = to.getTime() - from.getTime();
+      
+      if (diffInMs < 0) {
+        setTotalDowntime('Invalid time');
+        return;
+      }
+
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      const hours = Math.floor(diffInMinutes / 60);
+      const minutes = diffInMinutes % 60;
+      setTotalDowntime(`${hours} hours ${minutes} minutes`);
+    } else {
+      setTotalDowntime('0 hours 0 minutes');
+    }
+  }, [downtimeFrom, downtimeTo]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Basic form validation for anonymous users
+    if (!shift || !downtimeFrom || !downtimeTo || !machineId || !problemObserved) {
+      setMessageBoxMessage('Please fill out all required fields.');
+      setIsMessageBoxOpen(true);
+      return;
+    }
+// Create new ticket object
+    const ticketData = {
+      id: generateId(),
+      type: typeOfWork,
+      title: `${typeOfWork}: ${machines.find(m => m.id === machineId)?.machineName}`,
+      dateOfWork: new Date().toISOString(),
+      shift,
+      downtimeFrom,
+      downtimeTo,
+      totalDowntime,
+      machineId,
+      location,
+      problemObserved,
+      status: 'Open',
+      // Fields for logged-in users, left blank for anonymous
+      materialRequired: '',
+      attendedBy: 'Anonymous',
+      correctiveAction: '',
+      materialReplaced: '',
+      remark: '',
+    };
+    
+    onCreateTicket(ticketData);
+    // Reset form fields
+    setShift('First');
+    setDowntimeFrom('');
+    setDowntimeTo('');
+    setTypeOfWork('Breakdown');
+    setMachineId('');
+    setLocation('');
+    setProblemObserved('');
+    
+    setMessageBoxMessage('Ticket submitted successfully! You will be redirected to the main page.');
+    setIsMessageBoxOpen(true);
+
+    setTimeout(() => {
+        onGoBack(); // Redirect back to the login page
+    }, 2000);
+    
+  };
+const today = new Date().toISOString().slice(0, 10);
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-4xl">
+        <div className="flex justify-between items-center border-b pb-4 mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Report a Breakdown</h2>
+          <button
+            onClick={onGoBack}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors flex items-center space-x-1"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            <span>Back</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-gray-700">Work Details</h3>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Date of Work</span>
+              <input
+                type="date"
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value={today}
+                disabled
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Shift</span>
+              <select
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={shift}
+                onChange={(e) => setShift(e.target.value)}
+              >
+                <option>First</option>
+                <option>Second</option>
+                <option>Night</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Downtime From</span>
+              <input
+                type="datetime-local"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={downtimeFrom}
+                onChange={(e) => setDowntimeFrom(e.target.value)}
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Downtime To</span>
+              <input
+                type="datetime-local"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={downtimeTo}
+                onChange={(e) => setDowntimeTo(e.target.value)}
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Total Downtime</span>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value={totalDowntime}
+                disabled
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Material Required</span>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value="N/A"
+                disabled
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Attended By</span>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value="Anonymous"
+                disabled
+              />
+            </label>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-gray-700">Problem Details</h3>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Type of Work</span>
+              <select
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={typeOfWork}
+                onChange={(e) => setTypeOfWork(e.target.value)}
+              >
+                <option>Breakdown</option>
+                <option>Other Work</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Machine Name</span>
+              <select
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={machineId}
+                onChange={(e) => setMachineId(e.target.value)}
+              >
+                <option value="">Select a Machine</option>
+                {machines.map(m => (
+                  <option key={m.id} value={m.id}>{m.machineName}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Location</span>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value={location}
+                disabled
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Problem Observed</span>
+              <textarea
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3"
+                value={problemObserved}
+                onChange={(e) => setProblemObserved(e.target.value)}
+                rows="4"
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Corrective Action</span>
+              <textarea
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value="N/A"
+                disabled
+                rows="2"
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Material Replaced</span>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value="N/A"
+                disabled
+              />
+            </label>
+            <label className="block">
+              <span className="text-gray-700 font-medium">Remark</span>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 text-gray-500 cursor-not-allowed shadow-sm p-3"
+                value="N/A"
+                disabled
+              />
+            </label>
+          </div>
+          <div className="md:col-span-2">
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 flex items-center justify-center space-x-2"
+            >
+              <Save className="w-5 h-5" />
+              <span>Submit Breakdown Ticket</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <MessageBox
+        isOpen={isMessageBoxOpen}
+        onClose={() => setIsMessageBoxOpen(false)}
+        title="Form Submission"
+        message={messageBoxMessage}
+      />
+    </div>
+  );
+};
 
 
 // Component for the new Tickets page with tabs
@@ -2252,7 +2519,15 @@ if (new Date(ticket.scheduledDate) > closedDate) {
 
   const renderPage = () => {
     if (currentPage === 'anonymous-form') {
-      return <BreakdownTicketFormAnonymous onAddTicket={handleAddTicket} machines={machines} onGoBack={() => setCurrentPage('login')} />;
+      
+    return (
+    <BreakdownTicketFormAnonymous
+      machines={machines}
+      onCreateTicket={handleAddTicket}
+      onGoBack={() => setCurrentPage('login')}
+    />
+  );
+
     }
 
     if (currentPage === 'edit-breakdown-ticket' && editingTicket) {
@@ -2336,6 +2611,17 @@ if (new Date(ticket.scheduledDate) > closedDate) {
   if (!isLoggedIn && currentPage !== 'anonymous-form') {
     return <LoginPage onLogin={handleLogin} users={users} onGoToAnonymousForm={() => setCurrentPage('anonymous-form')} />;
   }
+if (currentPage === 'anonymous-form') {
+      
+    return (
+    <BreakdownTicketFormAnonymous
+      machines={machines}
+      onCreateTicket={handleAddTicket}
+      onGoBack={() => setCurrentPage('login')}
+    />
+  );
+
+    }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center font-sans">
