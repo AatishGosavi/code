@@ -1,0 +1,25 @@
+Sample IDs,,,,,
+Fiber ID,ptd2620053,,,,
+Length (m),2,,,,
+Time of Measurement,6/27/2026 5:10:14 PM,,,,
+,,,,,
+Fiber Geometry,,,,,
+,Diameter (um),Non Circularity (%),Concentricity(um),,
+Core  (25%),8.493,1.276,0.247,,
+Cladding,125.159,0.447,,,
+,,,,,
+Cut-off Wavelength,,,,,
+Cut-off Wavelength (nm),1232.2,,,,
+,,,,,
+Mode Field Diameter,,,,,
+Wavelength (nm),Gaussian MFD (um),Petermann MFD (um),Effective Area (um^2),,
+1310,9.36,9.05,60.2,,
+,,,,,
+Coating Geometry,3,,,,
+,Diameter (um),Concentricity (um),Non-Circularity (%),Minimum Wall (um),Maximum Wall (um)
+Fiber,125.86,-----,1.08,54.3,58.64
+Inner,NaN,-----,-100,-1000000,-1000000
+Outer,240.24,1.9,2.08,-1000000,-1000000
+,,,,,
+Fiber Curl,,,,,
+Fiber Curl (m),13.5,,,,
