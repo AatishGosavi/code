@@ -1,0 +1,122 @@
+-- ====================================================================
+-- 1. MASTER SNAPSHOT TABLE (f_measurements)
+-- Enforces ONE unique row per fiber_id. 
+-- New files with the same fiber_id will update/merge into this row.
+-- ====================================================================
+CREATE TABLE f_measurements (
+    fiber_id VARCHAR(100) PRIMARY KEY, -- Standalone Primary Key
+    length NUMERIC,
+    measurement_date DATE,
+    measurement_time TIME,
+    
+    -- Fiber Geometry Section
+    core_25_diameter NUMERIC,
+    core_non_circularity NUMERIC,
+    core_concentricity NUMERIC,
+    cladding_dia NUMERIC,
+    cladding_non_circularity NUMERIC,
+    
+    -- Cut-off Wavelength Section
+    cutoff_wavelength NUMERIC,
+    
+    -- Mode Field Diameter Section
+    mfd_wavelength NUMERIC,
+    gaussian_mfd NUMERIC,
+    petermann_mfd NUMERIC,
+    effective_area NUMERIC,
+    
+    -- Coating Geometry Section
+    coating_outer_dia NUMERIC,
+    coating_outer_concentricity NUMERIC,
+    coating_outer_non_circularity NUMERIC,
+    
+    coating_inner_dia NUMERIC,
+    coating_inner_concentricity NUMERIC,
+    coating_inner_non_circularity NUMERIC,
+    
+    coating_fiber_dia NUMERIC,
+    coating_fiber_concentricity NUMERIC,
+    coating_fiber_non_circularity NUMERIC,
+    
+    -- Fiber Curl Section
+    fiber_curl NUMERIC,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ====================================================================
+-- 2. HISTORICAL SUB-TABLES
+-- Uses an auto-incrementing 'id' so that the same fiber_id can be 
+-- inserted multiple times as length, date, or time changes.
+-- ====================================================================
+
+-- A. Geometry Logs
+CREATE TABLE f_geometry_history (
+    id SERIAL PRIMARY KEY,
+    fiber_id VARCHAR(100),
+    length NUMERIC,
+    measurement_date DATE,
+    measurement_time TIME,
+    core_25_diameter NUMERIC,
+    core_non_circularity NUMERIC,
+    core_concentricity NUMERIC,
+    cladding_dia NUMERIC,
+    cladding_non_circularity NUMERIC,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- B. Cut-off Logs
+CREATE TABLE f_cutoff_history (
+    id SERIAL PRIMARY KEY,
+    fiber_id VARCHAR(100),
+    length NUMERIC,
+    measurement_date DATE,
+    measurement_time TIME,
+    cutoff_wavelength NUMERIC,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- C. Mode Field Diameter Logs
+CREATE TABLE f_mfd_history (
+    id SERIAL PRIMARY KEY,
+    fiber_id VARCHAR(100),
+    length NUMERIC,
+    measurement_date DATE,
+    measurement_time TIME,
+    mfd_wavelength NUMERIC,
+    gaussian_mfd NUMERIC,
+    petermann_mfd NUMERIC,
+    effective_area NUMERIC,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- D. Coating Logs
+CREATE TABLE f_coating_history (
+    id SERIAL PRIMARY KEY,
+    fiber_id VARCHAR(100),
+    length NUMERIC,
+    measurement_date DATE,
+    measurement_time TIME,
+    coating_outer_dia NUMERIC,
+    coating_outer_concentricity NUMERIC,
+    coating_outer_non_circularity NUMERIC,
+    coating_inner_dia NUMERIC,
+    coating_inner_concentricity NUMERIC,
+    coating_inner_non_circularity NUMERIC,
+    coating_fiber_dia NUMERIC,
+    coating_fiber_concentricity NUMERIC,
+    coating_fiber_non_circularity NUMERIC,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- E. Curl Logs
+CREATE TABLE f_curl_history (
+    id SERIAL PRIMARY KEY,
+    fiber_id VARCHAR(100),
+    length NUMERIC,
+    measurement_date DATE,
+    measurement_time TIME,
+    fiber_curl NUMERIC,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
